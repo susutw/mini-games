@@ -1,0 +1,46 @@
+:root {
+  --bg: #0f1020;
+  --panel: #1a1b33;
+  --text: #e8e8f5;
+  --muted: #9a9bc0;
+  --accent: #7cf29c;
+  --accent-2: #ff7ab6;
+  --radius: 14px;
+  font-family: system-ui, -apple-system, "PingFang TC", "Noto Sans TC", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+}
+
+a { color: var(--accent); }
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.back {
+  display: inline-block;
+  margin-bottom: 12px;
+  color: var(--muted);
+  text-decoration: none;
+}
+.back:hover { color: var(--text); }
+
+button {
+  font: inherit;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #10131a;
+  font-weight: 600;
+  cursor: pointer;
+}
