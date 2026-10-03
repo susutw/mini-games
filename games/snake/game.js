@@ -11,7 +11,7 @@ const DIRS = {
   w: [0, -1], s: [0, 1], a: [-1, 0], d: [1, 0],
 };
 
-let snake, dir, nextDir, food, score, timer, paused;
+let snake, dir, nextDir, food, score, timer, paused, over;
 let best = 0;
 try { best = Number(localStorage.getItem('snake-best')) || 0; } catch {}
 bestEl.textContent = best;
@@ -21,6 +21,7 @@ function reset() {
   dir = nextDir = [1, 0];
   score = 0;
   paused = false;
+  over = false;
   scoreEl.textContent = 0;
   placeFood();
 }
@@ -69,29 +70,35 @@ function gameOver() {
     bestEl.textContent = best;
     try { localStorage.setItem('snake-best', best); } catch {}
   }
+  over = true;
   draw();
-  ctx.fillStyle = '#000a';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = '#fff';
-  ctx.textAlign = 'center';
-  ctx.font = 'bold 36px system-ui';
-  ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2);
-  ctx.font = '18px system-ui';
-  ctx.fillText(`分數 ${score}`, canvas.width / 2, canvas.height / 2 + 32);
   startBtn.textContent = '再玩一次';
 }
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = '#ff7ab6';
+  ctx.fillStyle = cssVar('--food');
   ctx.beginPath();
   ctx.arc((food[0] + .5) * CELL, (food[1] + .5) * CELL, CELL * .4, 0, Math.PI * 2);
   ctx.fill();
+  const head = cssVar('--snake-head'), body = cssVar('--snake');
   snake.forEach(([x, y], i) => {
-    ctx.fillStyle = i === 0 ? '#b6ffc9' : '#7cf29c';
+    ctx.fillStyle = i === 0 ? head : body;
     ctx.fillRect(x * CELL + 1, y * CELL + 1, CELL - 2, CELL - 2);
   });
+  if (over) {
+    ctx.fillStyle = cssVar('--overlay');
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = cssVar('--text');
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 36px system-ui';
+    ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2);
+    ctx.font = '18px system-ui';
+    ctx.fillText(`分數 ${score}`, canvas.width / 2, canvas.height / 2 + 32);
+  }
 }
+
+document.addEventListener('themechange', draw);
 
 function turn(d) {
   // 不能直接回頭

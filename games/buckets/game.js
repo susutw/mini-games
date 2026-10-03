@@ -130,17 +130,23 @@ function updateHud() {
 
 // ---------- 繪圖 ----------
 
-const C = {
-  wall: '#c9cbe8',
-  water: '#4fb3ff',
-  waterSoft: 'rgba(79, 179, 255, 0.35)',
-  pipe: '#5b5e8c',
-  stand: '#2a2c50',
-  zone: 'rgba(124, 242, 156, 0.22)',
-  zoneLine: '#7cf29c',
-  marker: '#ff5d73',
-  text: '#e8e8f5',
-};
+// 顏色來自 shared/style.css 的主題變數，切換主題時重新讀取
+let C;
+function loadColors() {
+  C = {
+    wall: cssVar('--wall'),
+    water: cssVar('--water'),
+    waterSoft: cssVar('--water-soft'),
+    pipe: cssVar('--pipe'),
+    stand: cssVar('--stand'),
+    zone: cssVar('--zone'),
+    zoneLine: cssVar('--zone-line'),
+    marker: cssVar('--marker'),
+    text: cssVar('--text'),
+  };
+}
+loadColors();
+document.addEventListener('themechange', loadColors);
 
 function drawBucket(x, base, w, h) {
   ctx.strokeStyle = C.wall;
@@ -154,13 +160,15 @@ function drawBucket(x, base, w, h) {
   ctx.stroke();
   // 刻度，每 20px 一格
   ctx.lineWidth = 1.5;
-  ctx.strokeStyle = 'rgba(201, 203, 232, 0.45)';
+  ctx.strokeStyle = C.wall;
+  ctx.globalAlpha = 0.5;
   for (let y = 20; y < h; y += 20) {
     ctx.beginPath();
     ctx.moveTo(x, base - y);
     ctx.lineTo(x + 7, base - y);
     ctx.stroke();
   }
+  ctx.globalAlpha = 1;
 }
 
 function fillWater(x, base, w, from, to, color) {
