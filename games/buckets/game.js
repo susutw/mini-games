@@ -6,6 +6,7 @@ const statusEl = $('status');
 const extraEl = $('extra');
 const actionBtn = $('action');
 const shareBtn = $('share');
+const storyBtn = $('story');
 const muteBtn = $('mute');
 const modeBtns = document.querySelectorAll('[data-mode]');
 
@@ -401,6 +402,8 @@ function updateHud() {
   }[phase];
   actionBtn.disabled = phase === 'flowing';
   shareBtn.hidden = !(mode === 'daily' && phase === 'dailyDone' && savedDaily());
+  storyBtn.hidden = shareBtn.hidden;
+  if (!storyBtn.hidden) prepareStory();
   modeBtns.forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
   muteBtn.textContent = sound.muted ? '🔇' : '🔊';
 }
@@ -425,6 +428,157 @@ async function share() {
   } catch {
     prompt('複製以下文字分享：', text);
   }
+}
+
+// ---------- IG 限動圖片 ----------
+// 網頁無法直接發限動，改用 Web Share 分享圖片檔，手機上可在分享選單選 Instagram → 限時動態。
+// 圖片在結算畫面出現時就先產生，按下按鈕時才能立即呼叫 navigator.share（不會失去使用者手勢）。
+const STORY_COLORS = { hit: '#1f9d55', low: '#f5b83d', high: '#e5484d', spill: '#3b9cf0' };
+const STORY_LABELS = { hit: '命中', low: '太少', high: '太多', spill: '溢出' };
+let storyFile = null, storyFor = null;
+
+const canShareFiles = (() => {
+  try {
+    return !!navigator.canShare && navigator.canShare({ files: [new File([''], 'x.png', { type: 'image/png' })] });
+  } catch { return false; }
+})();
+const STORY_LABEL = canShareFiles ? '分享到 IG 限動 📸' : '下載限動圖片 📸';
+
+function roundRect(g, x, y, w, h, r) {
+  g.beginPath();
+  g.moveTo(x + r, y);
+  g.arcTo(x + w, y, x + w, y + h, r);
+  g.arcTo(x + w, y + h, x, y + h, r);
+  g.arcTo(x, y + h, x, y, r);
+  g.arcTo(x, y, x + w, y, r);
+  g.closePath();
+}
+
+// 1080×1920；IG 上下約 250px 會被介面蓋住，重要內容放中間
+function drawStory(g, res, date) {
+  const SW = 1080, SH = 1920, cx = SW / 2;
+  const font = (w, s) => `${w} ${s}px system-ui, -apple-system, "PingFang TC", "Noto Sans TC", sans-serif`;
+  const hits = res.filter(r => r === 'hit').length;
+
+  const bg = g.createLinearGradient(0, 0, 0, SH);
+  bg.addColorStop(0, '#e6f2ff');
+  bg.addColorStop(1, '#f6f7fb');
+  g.fillStyle = bg;
+  g.fillRect(0, 0, SW, SH);
+
+  // 底部水波
+  const wave = (top, color, off) => {
+    g.fillStyle = color;
+    g.beginPath();
+    g.moveTo(0, SH);
+    for (let x = 0; x <= SW; x += 10) g.lineTo(x, top + Math.sin(x / 90 + off) * 18 + Math.sin(x / 37 + off) * 6);
+    g.lineTo(SW, SH);
+    g.closePath();
+    g.fill();
+  };
+  wave(1470, 'rgba(59, 156, 240, 0.35)', 0);
+  wave(1510, '#3b9cf0', 2);
+
+  g.textAlign = 'center';
+  g.textBaseline = 'alphabetic';
+  g.fillStyle = '#6b6f8f';
+  g.font = font(600, 44);
+  g.fillText('🎮 Mini Games', cx, 320);
+  g.fillStyle = '#1f2340';
+  g.font = font(800, 150);
+  g.fillText('連通水桶', cx, 490);
+
+  // 日期膠囊
+  const pill = `📅 每日挑戰 ${date}`;
+  g.font = font(700, 42);
+  const pw = g.measureText(pill).width + 80;
+  g.fillStyle = '#e84a8a';
+  roundRect(g, cx - pw / 2, 550, pw, 84, 42);
+  g.fill();
+  g.fillStyle = '#fff';
+  g.fillText(pill, cx, 607);
+
+  // 成績卡
+  g.save();
+  g.shadowColor = 'rgba(31, 35, 64, 0.15)';
+  g.shadowBlur = 50;
+  g.shadowOffsetY = 16;
+  g.fillStyle = '#fff';
+  roundRect(g, 120, 700, 840, 740, 48);
+  g.fill();
+  g.restore();
+
+  g.fillStyle = '#1f9d55';
+  g.font = font(800, 190);
+  g.fillText(`${hits} / ${res.length}`, cx, 915);
+  g.fillStyle = '#6b6f8f';
+  g.font = font(600, 46);
+  g.fillText('命中安全區間', cx, 1025);
+
+  // 10 格成績，兩排各 5 格
+  const size = 120, gap = 24, gx = cx - (5 * size + 4 * gap) / 2;
+  res.forEach((r, i) => {
+    g.fillStyle = STORY_COLORS[r];
+    roundRect(g, gx + (i % 5) * (size + gap), 1060 + Math.floor(i / 5) * (size + gap), size, size, 26);
+    g.fill();
+  });
+
+  // 圖例
+  g.font = font(600, 34);
+  const items = Object.keys(STORY_LABELS).map(k => ({ k, w: 34 + 12 + g.measureText(STORY_LABELS[k]).width }));
+  const total = items.reduce((s, it) => s + it.w, 0) + (items.length - 1) * 36;
+  let lx = cx - total / 2;
+  g.textAlign = 'left';
+  for (const it of items) {
+    g.fillStyle = STORY_COLORS[it.k];
+    roundRect(g, lx, 1366, 34, 34, 8);
+    g.fill();
+    g.fillStyle = '#6b6f8f';
+    g.fillText(STORY_LABELS[it.k], lx + 46, 1396);
+    lx += it.w + 36;
+  }
+
+  g.textAlign = 'center';
+  g.fillStyle = '#fff';
+  g.font = font(800, 56);
+  g.fillText('你能拿幾分？來挑戰 👇', cx, 1610);
+  g.font = font(600, 46);
+  g.fillText('sudosu.tw/mini-games', cx, 1680);
+}
+
+function prepareStory() {
+  const res = savedDaily();
+  if (!res) return;
+  const key = `${dailyDate}:${res.join()}`;
+  if (storyFor === key) return;
+  storyFor = key;
+  storyFile = null;
+  const c = document.createElement('canvas');
+  c.width = 1080;
+  c.height = 1920;
+  drawStory(c.getContext('2d'), res, dailyDate);
+  c.toBlob(blob => {
+    if (blob && storyFor === key) {
+      storyFile = new File([blob], `buckets-daily-${dailyDate}.png`, { type: 'image/png' });
+    }
+  }, 'image/png');
+}
+
+async function shareStory() {
+  if (!storyFile) return;
+  const data = { files: [storyFile] };
+  if (canShareFiles && navigator.canShare(data)) {
+    try { await navigator.share(data); } catch {}
+    return;
+  }
+  // 電腦沒有分享選單：直接下載圖片
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(storyFile);
+  a.download = storyFile.name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  storyBtn.textContent = '已下載圖片 ✅';
+  setTimeout(() => { storyBtn.textContent = STORY_LABEL; }, 1500);
 }
 
 // ---------- 繪圖 ----------
@@ -666,6 +820,8 @@ function loop(now) {
 
 actionBtn.addEventListener('click', () => { act(); actionBtn.blur(); });
 shareBtn.addEventListener('click', () => { share(); shareBtn.blur(); });
+storyBtn.textContent = STORY_LABEL;
+storyBtn.addEventListener('click', () => { shareStory(); storyBtn.blur(); });
 muteBtn.addEventListener('click', () => {
   sound.muted = !sound.muted;
   store.set('mini-games-muted', sound.muted ? '1' : '0');
