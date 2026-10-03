@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>連通水桶</title>
+  <link rel="stylesheet" href="../../shared/style.css">
+  <style>
+    .wrap { max-width: 680px; margin: 0 auto; }
+    .hud { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 12px; }
+    canvas {
+      display: block;
+      width: 100%;
+      aspect-ratio: 640 / 440;
+      background: var(--panel);
+      border-radius: var(--radius);
+      touch-action: manipulation;
+      cursor: pointer;
+    }
+    .hint { color: var(--muted); text-align: center; font-size: .9rem; }
+    #action { min-width: 140px; font-size: 1.1rem; padding: 10px 20px; }
+  </style>
+</head>
+<body>
+  <main class="container wrap">
+    <a class="back" href="../../">← 回大廳</a>
+    <div class="hud">
+      <strong>🪣 第 <span id="level">1</span> 關</strong>
+      <span id="lives"></span>
+      <span>最高：第 <span id="best">0</span> 關</span>
+    </div>
+    <canvas id="board"></canvas>
+    <p style="text-align:center"><button id="action">開始放水 ▶</button></p>
+    <p class="hint">紅線往下掉時按「停」（或空白鍵 / 點畫面），讓右桶水位落在綠色區間</p>
+  </main>
+  <script src="game.js"></script>
+</body>
+</html>

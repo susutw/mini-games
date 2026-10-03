@@ -38,6 +38,7 @@
     // 新增遊戲時，在這裡加一筆
     const games = [
       { slug: 'snake', emoji: '🐍', name: '貪食蛇', desc: '方向鍵或滑動操控，吃越多越長' },
+      { slug: 'buckets', emoji: '🪣', name: '連通水桶', desc: '抓準時機停止放水，讓右桶水位剛好落在安全區間' },
     ];
     document.getElementById('games').innerHTML = games.map(g => `
       <a class="card" href="games/${g.slug}/">
