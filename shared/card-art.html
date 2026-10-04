@@ -1,0 +1,110 @@
+<!doctype html>
+<!--
+  接龍 / 新接龍的 logo 與 og image 原始檔，用無頭瀏覽器截圖產生：
+    card-art.html#solitaire,logo  → games/solitaire/logo.png（392×180，新接龍 548×180；2 倍解析度、透明背景）
+    card-art.html#freecell,og     → games/freecell/og.png（1200×630）
+-->
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <title>Card game art</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Press+Start+2P&display=block" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; }
+    html, body { background: transparent; overflow: hidden; }
+    body { font-family: "DotGothic16", system-ui, sans-serif; }
+
+    .art { position: relative; display: flex; align-items: center; }
+    .cards { position: relative; flex: none; }
+    .cards .c { position: absolute; filter: drop-shadow(0 6px 0 rgba(0, 0, 0, 0.28)); }
+    .cards svg { display: block; width: 100%; height: 100%; }
+
+    /* 白字 + 像素描邊（8 個方向的硬陰影）+ 斜下方色塊陰影 */
+    .word {
+      color: #fff;
+      line-height: 1;
+      white-space: nowrap;
+      --o: 5px;
+      --ink: #1f2340;
+      text-shadow:
+        var(--o) 0 0 var(--ink), calc(-1 * var(--o)) 0 0 var(--ink),
+        0 var(--o) 0 var(--ink), 0 calc(-1 * var(--o)) 0 var(--ink),
+        var(--o) var(--o) 0 var(--ink), calc(-1 * var(--o)) var(--o) 0 var(--ink),
+        var(--o) calc(-1 * var(--o)) 0 var(--ink), calc(-1 * var(--o)) calc(-1 * var(--o)) 0 var(--ink),
+        calc(var(--o) * 2) calc(var(--o) * 2) 0 var(--shadow);
+    }
+    .sub {
+      font-family: "Press Start 2P", monospace;
+      color: var(--shadow);
+      letter-spacing: 2px;
+    }
+
+    /* logo：高 180，寬度依遊戲而定 */
+    .logo { height: 180px; padding: 0 12px; gap: 26px; }
+    .logo .word { font-size: 100px; }
+    .logo .sub { font-size: 18px; margin-top: 14px; }
+
+    /* og：1200×630，像素綠絨布 */
+    .og {
+      width: 1200px;
+      height: 630px;
+      padding: 0 90px;
+      gap: 60px;
+      background-color: #2e8b57;
+      background-image:
+        linear-gradient(45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.05) 75%),
+        linear-gradient(45deg, rgba(255, 255, 255, 0.05) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, 0.05) 75%);
+      background-size: 8px 8px;
+      background-position: 0 0, 4px 4px;
+    }
+    .og .word { font-size: 150px; --o: 7px; }
+    .og .sub { font-size: 26px; margin-top: 26px; color: #fff; text-shadow: 3px 3px 0 #1f2340; }
+    .og .tag { margin-top: 34px; font-size: 34px; color: #fff; text-shadow: 3px 3px 0 #1f2340; }
+    .og .url { position: absolute; left: 90px; bottom: 44px; font-family: "Press Start 2P", monospace; font-size: 20px; color: rgba(255, 255, 255, 0.85); }
+  </style>
+  <script src="cards.js"></script>
+</head>
+<body>
+  <script>
+    const [game, kind] = (location.hash.slice(1) || 'solitaire,logo').split(',');
+    const CONF = {
+      solitaire: {
+        word: '接龍', sub: 'SOLITAIRE', logoW: 392, shadow: '#e5484d',
+        tag: '經典 Klondike・抽 1 張或 3 張',
+        // K♠ Q♥ J♣ 往右下斜疊，像牌列
+        cards: [[3 * 13 + 12, 0, 0], [2 * 13 + 11, 1, 1], [0 * 13 + 10, 2, 2]],
+        step: [0.42, 0.3],
+      },
+      freecell: {
+        word: '新接龍', sub: 'FREECELL', logoW: 548, shadow: '#3b9cf0',
+        tag: '和 Windows 相同的 32000 個牌局',
+        // 四張 A 排開，像四個回收區
+        cards: [[0, 0, 0], [13, 1, 1], [26, 2, 0], [39, 3, 1]],
+        step: [0.55, 0.16],
+      },
+    }[game];
+
+    const cw = kind === 'og' ? 168 : 72;
+    const ch = cw * 34 / 24;
+    const cols = Math.max(...CONF.cards.map(c => c[1]));
+    const rows = Math.max(...CONF.cards.map(c => c[2]));
+    const boxW = cw + cols * cw * CONF.step[0];
+    const boxH = ch + rows * ch * CONF.step[1];
+    const cards = CONF.cards.map(([id, x, y]) =>
+      `<div class="c" style="left:${x * cw * CONF.step[0]}px;top:${y * ch * CONF.step[1]}px;width:${cw}px;height:${ch}px">${cardSvg(id)}</div>`).join('');
+
+    document.body.innerHTML = `
+      <div class="art ${kind}" style="--shadow:${CONF.shadow};${kind === 'logo' ? `width:${CONF.logoW}px` : ''}">
+        <div class="cards" style="width:${boxW}px;height:${boxH}px">${cards}</div>
+        <div>
+          <div class="word">${CONF.word}</div>
+          <div class="sub">${CONF.sub}</div>
+          ${kind === 'og' ? `<div class="tag">${CONF.tag}</div>` : ''}
+        </div>
+        ${kind === 'og' ? '<div class="url">sudosu.tw/mini-games</div>' : ''}
+      </div>`;
+  </script>
+</body>
+</html>

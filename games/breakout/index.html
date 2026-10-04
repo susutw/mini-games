@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>打彈珠</title>
+  <meta name="description" content="像素風打彈珠：左右移動平板把球彈回去，打破上面所有的磚塊。">
+  <link rel="stylesheet" href="../../shared/style.css">
+  <script src="../../shared/pixel-icons.js"></script>
+  <script src="../../shared/theme.js"></script>
+  <style>
+    .wrap { max-width: 520px; margin: 0 auto; }
+    .hud { display: flex; justify-content: space-between; align-items: center; gap: 8px 14px; flex-wrap: wrap; margin-bottom: 12px; }
+    .hud .stats { color: var(--muted); }
+    .hud .stats b { color: var(--text); font-variant-numeric: tabular-nums; }
+    .hud .right { display: flex; align-items: center; gap: 10px; color: var(--muted); }
+    #mute { background: var(--panel); color: var(--text); border: 1px solid var(--border); padding: 4px 10px; }
+    .stage { position: relative; }
+    canvas {
+      display: block;
+      width: 100%;
+      aspect-ratio: 240 / 320;
+      image-rendering: pixelated;
+      background: #14152b;
+      border: 3px solid #2b2d42;
+      border-radius: 6px;
+      touch-action: none;
+      cursor: crosshair;
+    }
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+    .overlay[hidden] { display: none; }
+    .overlay .box {
+      pointer-events: auto;
+      padding: 18px 26px;
+      background: var(--panel);
+      color: var(--text);
+      border: 3px solid var(--text);
+      box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.35);
+      text-align: center;
+    }
+    .overlay h2 { margin: 0 0 6px; font-size: 1.4rem; }
+    .overlay p { margin: 0 0 14px; color: var(--muted); }
+    .overlay .tip {
+      align-self: flex-end;
+      margin-bottom: 18%;
+      color: #fff;
+      font-weight: 600;
+      text-shadow: 2px 2px 0 #000;
+    }
+    .controls { display: flex; justify-content: center; gap: 10px; margin: 16px 0 8px; }
+    button.secondary { background: var(--panel); color: var(--text); border: 1px solid var(--border); }
+    .hint { color: var(--muted); text-align: center; font-size: .9rem; }
+  </style>
+</head>
+<body>
+  <main class="container wrap">
+    <a class="back" href="../../"><i data-px="arrow-left"></i> 回大廳</a>
+    <div class="hud">
+      <strong><i data-px="breakout"></i> 打彈珠</strong>
+      <span class="stats">分數 <b id="score">0</b>　第 <b id="level">1</b> 關</span>
+      <span id="lives"></span>
+      <span class="right">最高 <b id="best">0</b><button id="mute" aria-label="靜音"></button></span>
+    </div>
+    <div class="stage">
+      <canvas id="board"></canvas>
+      <div class="overlay" id="overlay" hidden></div>
+    </div>
+    <div class="controls">
+      <button id="pause" class="secondary">暫停 <i data-px="pause"></i></button>
+      <button id="restart">重新開始 <i data-px="retry"></i></button>
+    </div>
+    <p class="hint">滑鼠或手指左右移動平板，點一下或空白鍵發射；方向鍵也可以移動，P 暫停</p>
+  </main>
+  <script src="game.js"></script>
+</body>
+</html>

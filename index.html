@@ -43,6 +43,7 @@
       { slug: 'buckets', icon: 'bucket', name: '連通水桶', desc: '抓準時機停止放水，讓右桶水位剛好落在安全區間' },
       { slug: 'solitaire', icon: 'cards', name: '接龍', desc: '經典 Klondike 接龍，可選抽 1 張或 3 張' },
       { slug: 'freecell', icon: 'freecell', name: '新接龍', desc: 'FreeCell，和 Windows 一樣的 32000 個牌局編號' },
+      { slug: 'breakout', icon: 'breakout', name: '打彈珠', desc: '左右移動平板把球彈回去，打破上面所有磚塊' },
     ];
     document.getElementById('games').innerHTML = games.map(g => `
       <a class="card" href="games/${g.slug}/">

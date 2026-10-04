@@ -10,6 +10,7 @@
 | 🪣 [連通水桶](games/buckets/) | 抓準時機停止放水，讓右桶水位剛好落在安全區間；有每日挑戰可分享成績 |
 | 🃏 [接龍](games/solitaire/) | 經典 Klondike 接龍，可選抽 1 張或 3 張 |
 | ♠️ [新接龍](games/freecell/) | FreeCell，和 Windows 一樣的 32000 個牌局編號 |
+| 🧱 [打彈珠](games/breakout/) | 左右移動平板把球彈回去，打破上面所有磚塊；有道具和 5 種關卡 |
 
 ## 本機執行
 

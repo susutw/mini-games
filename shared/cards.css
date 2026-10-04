@@ -97,3 +97,9 @@ button.secondary { background: var(--panel); color: var(--text); border: 1px sol
 .table-msg[hidden] { display: none; }
 .table-msg h2 { margin: 0 0 6px; font-size: 1.4rem; }
 .table-msg p { margin: 0 0 14px; color: var(--muted); }
+
+/* 遊戲 logo（2 倍解析度的像素圖，縮小顯示） */
+.game-logo { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 1rem; }
+.game-logo img { height: 64px; width: auto; }
+.game-logo span { color: var(--muted); font-size: 1.1rem; }
+@media (max-width: 480px) { .game-logo img { height: 48px; } }
