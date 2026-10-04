@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>新接龍</title>
+  <meta name="description" content="像素風新接龍（FreeCell）：和 Windows 相同的 32000 個牌局編號。">
+  <link rel="stylesheet" href="../../shared/style.css">
+  <link rel="stylesheet" href="../../shared/cards.css">
+  <script src="../../shared/pixel-icons.js"></script>
+  <script src="../../shared/theme.js"></script>
+</head>
+<body>
+  <main class="container card-page">
+    <a class="back" href="../../"><i data-px="arrow-left"></i> 回大廳</a>
+    <div class="hud">
+      <strong><i data-px="freecell"></i> 新接龍 <span id="game-no"></span></strong>
+      <span class="stats">步數 <b id="moves">0</b>　時間 <b id="time">0:00</b>　過關 <b id="wins">0</b> 局</span>
+    </div>
+    <div id="table"></div>
+    <div class="controls">
+      <button id="new">新局 <i data-px="retry"></i></button>
+      <button id="undo" class="secondary">復原 <i data-px="undo"></i></button>
+      <button id="restart" class="secondary">重玩這局</button>
+      <button id="pick" class="secondary">選擇牌局 #</button>
+    </div>
+    <p class="hint">左上 4 格是暫存格；空的暫存格和空列越多，一次能搬的牌越多。可以收的牌會自動收走。</p>
+  </main>
+  <script src="../../shared/cards.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

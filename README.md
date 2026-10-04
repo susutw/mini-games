@@ -8,6 +8,8 @@
 | --- | --- |
 | 🐍 [貪食蛇](games/snake/) | 方向鍵或滑動操控，吃越多越長 |
 | 🪣 [連通水桶](games/buckets/) | 抓準時機停止放水，讓右桶水位剛好落在安全區間；有每日挑戰可分享成績 |
+| 🃏 [接龍](games/solitaire/) | 經典 Klondike 接龍，可選抽 1 張或 3 張 |
+| ♠️ [新接龍](games/freecell/) | FreeCell，和 Windows 一樣的 32000 個牌局編號 |
 
 ## 本機執行
 
@@ -29,6 +31,7 @@ python3 -m http.server 8000
 ```
 index.html          遊戲大廳
 shared/style.css    共用樣式
+shared/cards.js     撲克牌共用的牌桌與像素牌面
 games/<slug>/       每款遊戲一個資料夾
 ```
 
