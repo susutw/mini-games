@@ -4,6 +4,7 @@
 <head>
   <meta charset="utf-8">
   <title>連通水桶 OG image</title>
+  <script src="../../shared/pixel-icons.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; }
     html, body { width: 1200px; height: 630px; overflow: hidden; }
@@ -53,7 +54,9 @@
       overflow: hidden;
     }
     .art svg { width: 100%; height: 100%; }
-    .grid {
+    .px-icon { vertical-align: -0.2em; }
+    .chip { display: inline-flex; align-items: center; gap: 8px; }
+    .grid { display: flex; gap: 4px;
       position: absolute;
       top: 24px;
       right: 28px;
@@ -64,18 +67,18 @@
 </head>
 <body>
   <div class="text">
-    <div class="kicker">🎮 Mini Games</div>
+    <div class="kicker"><i data-px="gamepad" data-size="34px"></i> Mini Games</div>
     <h1>連通<span>水桶</span></h1>
     <p class="desc">抓準時機停止放水，<br>讓水位剛好落在<b>安全區間</b>！</p>
     <div class="chips">
-      <span class="chip daily">📅 每日挑戰</span>
-      <span class="chip">🟩 分享成績</span>
+      <span class="chip daily"><i data-px="calendar" data-size="28px"></i> 每日挑戰</span>
+      <span class="chip"><i data-px="camera" data-size="28px"></i> 分享成績</span>
     </div>
     <div class="url">sudosu.tw/mini-games</div>
   </div>
 
   <div class="art">
-    <div class="grid">🟩🟩🟨🟩🟥</div>
+    <div class="grid"><i data-px="sq-hit" data-size="36px"></i><i data-px="sq-hit" data-size="36px"></i><i data-px="sq-low" data-size="36px"></i><i data-px="sq-hit" data-size="36px"></i><i data-px="sq-high" data-size="36px"></i></div>
     <!-- 座標系 540×520 -->
     <svg viewBox="0 0 540 520">
       <!-- 地面與高台 -->

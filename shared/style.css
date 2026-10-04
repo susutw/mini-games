@@ -93,6 +93,14 @@ button {
 }
 button:disabled { opacity: .5; cursor: default; }
 
+/* 像素 icon（shared/pixel-icons.js） */
+.px-icon {
+  display: inline-block;
+  vertical-align: -0.22em;
+  flex: none;
+}
+button .px-icon { margin: 0 2px; }
+
 .theme-toggle {
   position: fixed;
   top: 12px;

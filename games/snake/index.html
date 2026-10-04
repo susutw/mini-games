@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>貪食蛇</title>
   <link rel="stylesheet" href="../../shared/style.css">
+  <script src="../../shared/pixel-icons.js"></script>
   <script src="../../shared/theme.js"></script>
   <style>
     .hud { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
@@ -25,9 +26,9 @@
 </head>
 <body>
   <main class="container wrap">
-    <a class="back" href="../../">← 回大廳</a>
+    <a class="back" href="../../"><i data-px="arrow-left"></i> 回大廳</a>
     <div class="hud">
-      <strong>🐍 分數：<span id="score">0</span></strong>
+      <strong><i data-px="snake"></i> 分數：<span id="score">0</span></strong>
       <span>最高：<span id="best">0</span></span>
     </div>
     <canvas id="board" width="480" height="480"></canvas>

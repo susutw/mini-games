@@ -133,10 +133,11 @@ let time = 0, waveL = 0.8, waveR = 0.8, shake = 0, splashAcc = 0, lastTick = 0;
 const particles = [];
 
 const OUTCOME = {
-  hit: { emoji: '🟩', msg: '🎉 完美！剛好落在安全區間' },
-  low: { emoji: '🟨', msg: '太少了，水位沒到綠色區間' },
-  high: { emoji: '🟥', msg: '太多了，水位超過綠色區間' },
-  spill: { emoji: '💦', msg: '💦 溢出來了！' },
+  // emoji 只用在分享出去的純文字；畫面上一律用像素 icon
+  hit: { emoji: '🟩', label: '命中', msg: '完美！剛好落在安全區間', icon: 'star' },
+  low: { emoji: '🟨', label: '太少', msg: '太少了，水位沒到綠色區間' },
+  high: { emoji: '🟥', label: '太多', msg: '太多了，水位超過綠色區間' },
+  spill: { emoji: '💦', label: '溢出', msg: '溢出來了！', icon: 'splash' },
 };
 
 const dailyKey = () => `buckets-daily-${dailyDate}`;
@@ -379,33 +380,34 @@ function update(dt) {
 
 function updateHud() {
   if (mode === 'endless') {
-    titleEl.textContent = `🪣 第 ${level} 關`;
-    statusEl.textContent = '❤️'.repeat(lives) + '🖤'.repeat(MAX_LIVES - lives);
+    titleEl.innerHTML = `${px('bucket')} 第 ${level} 關`;
+    statusEl.innerHTML = px('heart').repeat(lives) + px('heart-empty').repeat(MAX_LIVES - lives);
     extraEl.textContent = `最高：第 ${best} 關`;
   } else {
     const n = Math.min(dailyResults.length + (phase === 'result' || phase === 'dailyDone' ? 0 : 1), DAILY_ROUNDS);
-    titleEl.textContent = phase === 'dailyDone' ? '📅 每日挑戰' : `📅 每日挑戰 ${n} / ${DAILY_ROUNDS}`;
-    statusEl.textContent = dailyResults.map(r => OUTCOME[r].emoji).join('')
-      + '⬜'.repeat(DAILY_ROUNDS - dailyResults.length);
+    titleEl.innerHTML = px('calendar') + (phase === 'dailyDone' ? ' 每日挑戰' : ` 每日挑戰 ${n} / ${DAILY_ROUNDS}`);
+    statusEl.innerHTML = dailyResults.map(r => px(`sq-${r}`)).join('')
+      + px('sq-empty').repeat(DAILY_ROUNDS - dailyResults.length);
     extraEl.textContent = dailyDate + (dailyPractice ? '（練習）' : '');
   }
   const ok = outcome === 'hit';
-  actionBtn.textContent = {
-    ready: '開始放水 ▶',
-    aiming: '停！⏸',
-    flowing: '放水中…',
+  const [label, icon] = {
+    ready: ['開始放水', 'play'],
+    aiming: ['停！', 'pause'],
+    flowing: ['放水中…'],
     result: mode === 'daily'
-      ? (dailyResults.length >= DAILY_ROUNDS ? '看結果 🏁' : '下一題 ▶')
-      : (ok ? '下一關 ▶' : '再試一次 ↻'),
-    over: '重新開始 ↻',
-    dailyDone: '再玩一次（練習）↻',
+      ? (dailyResults.length >= DAILY_ROUNDS ? ['看結果', 'flag'] : ['下一題', 'play'])
+      : (ok ? ['下一關', 'play'] : ['再試一次', 'retry']),
+    over: ['重新開始', 'retry'],
+    dailyDone: ['再玩一次（練習）', 'retry'],
   }[phase];
+  actionBtn.innerHTML = icon ? `${label} ${px(icon)}` : label;
   actionBtn.disabled = phase === 'flowing';
   shareBtn.hidden = !(mode === 'daily' && phase === 'dailyDone' && savedDaily());
   storyBtn.hidden = shareBtn.hidden;
   if (!storyBtn.hidden) prepareStory();
   modeBtns.forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
-  muteBtn.textContent = sound.muted ? '🔇' : '🔊';
+  muteBtn.innerHTML = px(sound.muted ? 'sound-off' : 'sound-on');
 }
 
 async function share() {
@@ -423,8 +425,8 @@ async function share() {
   }
   try {
     await navigator.clipboard.writeText(text);
-    shareBtn.textContent = '已複製！✅';
-    setTimeout(() => { shareBtn.textContent = '分享成績 📋'; }, 1500);
+    shareBtn.innerHTML = `已複製！ ${px('check')}`;
+    setTimeout(() => { shareBtn.innerHTML = `分享成績 ${px('clipboard')}`; }, 1500);
   } catch {
     prompt('複製以下文字分享：', text);
   }
@@ -433,8 +435,6 @@ async function share() {
 // ---------- IG 限動圖片 ----------
 // 網頁無法直接發限動，改用 Web Share 分享圖片檔，手機上可在分享選單選 Instagram → 限時動態。
 // 圖片在結算畫面出現時就先產生，按下按鈕時才能立即呼叫 navigator.share（不會失去使用者手勢）。
-const STORY_COLORS = { hit: '#1f9d55', low: '#f5b83d', high: '#e5484d', spill: '#3b9cf0' };
-const STORY_LABELS = { hit: '命中', low: '太少', high: '太多', spill: '溢出' };
 let storyFile = null, storyFor = null;
 
 const canShareFiles = (() => {
@@ -442,7 +442,20 @@ const canShareFiles = (() => {
     return !!navigator.canShare && navigator.canShare({ files: [new File([''], 'x.png', { type: 'image/png' })] });
   } catch { return false; }
 })();
-const STORY_LABEL = canShareFiles ? '分享到 IG 限動 📸' : '下載限動圖片 📸';
+const STORY_LABEL = `${canShareFiles ? '分享到 IG 限動' : '下載限動圖片'} ${px('camera')}`;
+
+// 用目前的 g.font / fillStyle 把「icon + 文字」當一整塊置中；after 為 true 時 icon 放在文字後面
+function iconText(g, icon, text, cx, y, size, gap, after = false) {
+  const color = g.fillStyle;
+  const tw = g.measureText(text).width;
+  const x = cx - (size + gap + tw) / 2;
+  const iconX = after ? x + tw + gap : x;
+  g.textAlign = 'left';
+  g.fillText(text, after ? x : x + size + gap, y);
+  drawPixelIcon(g, icon, iconX, y - size * 0.82, size, color);
+  g.fillStyle = color;
+  g.textAlign = 'center';
+}
 
 function roundRect(g, x, y, w, h, r) {
   g.beginPath();
@@ -483,20 +496,20 @@ function drawStory(g, res, date) {
   g.textBaseline = 'alphabetic';
   g.fillStyle = '#6b6f8f';
   g.font = font(600, 44);
-  g.fillText('🎮 Mini Games', cx, 320);
+  iconText(g, 'gamepad', 'Mini Games', cx, 320, 56, 14);
   g.fillStyle = '#1f2340';
   g.font = font(800, 150);
   g.fillText('連通水桶', cx, 490);
 
   // 日期膠囊
-  const pill = `📅 每日挑戰 ${date}`;
+  const pill = `每日挑戰 ${date}`;
   g.font = font(700, 42);
-  const pw = g.measureText(pill).width + 80;
+  const pw = g.measureText(pill).width + 52 + 14 + 80;
   g.fillStyle = '#e84a8a';
   roundRect(g, cx - pw / 2, 550, pw, 84, 42);
   g.fill();
   g.fillStyle = '#fff';
-  g.fillText(pill, cx, 607);
+  iconText(g, 'calendar', pill, cx, 607, 52, 14);
 
   // 成績卡
   g.save();
@@ -518,30 +531,17 @@ function drawStory(g, res, date) {
   // 10 格成績，兩排各 5 格
   const size = 120, gap = 24, gx = cx - (5 * size + 4 * gap) / 2;
   res.forEach((r, i) => {
-    g.fillStyle = STORY_COLORS[r];
-    roundRect(g, gx + (i % 5) * (size + gap), 1060 + Math.floor(i / 5) * (size + gap), size, size, 26);
-    g.fill();
+    drawPixelIcon(g, `sq-${r}`, gx + (i % 5) * (size + gap), 1060 + Math.floor(i / 5) * (size + gap), size);
   });
 
   // 圖例
   g.font = font(600, 34);
-  const items = Object.keys(STORY_LABELS).map(k => ({ k, w: 34 + 12 + g.measureText(STORY_LABELS[k]).width }));
-  const total = items.reduce((s, it) => s + it.w, 0) + (items.length - 1) * 36;
-  let lx = cx - total / 2;
-  g.textAlign = 'left';
-  for (const it of items) {
-    g.fillStyle = STORY_COLORS[it.k];
-    roundRect(g, lx, 1366, 34, 34, 8);
-    g.fill();
-    g.fillStyle = '#6b6f8f';
-    g.fillText(STORY_LABELS[it.k], lx + 46, 1396);
-    lx += it.w + 36;
-  }
+  drawLegend(g, cx, 1396, 36, '#6b6f8f');
 
   g.textAlign = 'center';
   g.fillStyle = '#fff';
   g.font = font(800, 56);
-  g.fillText('你能拿幾分？來挑戰 👇', cx, 1610);
+  iconText(g, 'arrow-down', '你能拿幾分？來挑戰', cx, 1610, 52, 16, true);
   g.font = font(600, 46);
   g.fillText('sudosu.tw/mini-games', cx, 1680);
 }
@@ -577,8 +577,8 @@ async function shareStory() {
   a.download = storyFile.name;
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-  storyBtn.textContent = '已下載圖片 ✅';
-  setTimeout(() => { storyBtn.textContent = STORY_LABEL; }, 1500);
+  storyBtn.innerHTML = `已下載圖片 ${px('check')}`;
+  setTimeout(() => { storyBtn.innerHTML = STORY_LABEL; }, 1500);
 }
 
 // ---------- 繪圖 ----------
@@ -720,24 +720,45 @@ function drawParticles() {
   }
 }
 
-function drawText(text, y, size, color = C.text, weight = 600) {
+// 置中文字；有 icon 時把 icon 和文字當成一整塊置中
+function drawText(text, y, size, color = C.text, weight = 600, icon = null) {
   ctx.fillStyle = color;
   ctx.font = `${weight} ${size}px system-ui, "PingFang TC", sans-serif`;
-  ctx.textAlign = 'center';
-  ctx.fillText(text, W / 2, y);
+  if (!icon) {
+    ctx.textAlign = 'center';
+    ctx.fillText(text, W / 2, y);
+    return;
+  }
+  iconText(ctx, icon, text, W / 2, y, Math.round(size * 1.25), Math.round(size * 0.4));
+}
+
+// 圖例：像素方塊 + 說明文字，整排置中
+function drawLegend(g, cx, y, size, color) {
+  const gap = size * 0.4, space = size * 1.1;
+  const items = Object.keys(OUTCOME).map(k => ({ k, w: size + gap + g.measureText(OUTCOME[k].label).width }));
+  let x = cx - (items.reduce((s, it) => s + it.w, 0) + space * (items.length - 1)) / 2;
+  g.textAlign = 'left';
+  for (const it of items) {
+    drawPixelIcon(g, `sq-${it.k}`, x, y - size * 0.85, size);
+    g.fillStyle = color;
+    g.fillText(OUTCOME[it.k].label, x + size + gap, y);
+    x += it.w + space;
+  }
 }
 
 function drawDailySummary() {
   const official = savedDaily();
   const hits = dailyResults.filter(r => r === 'hit').length;
-  drawText(`📅 每日挑戰 ${dailyDate}`, 90, 22);
+  drawText(`每日挑戰 ${dailyDate}`, 90, 22, C.text, 600, 'calendar');
   drawText(`${hits} / ${DAILY_ROUNDS}`, 175, 64, C.zoneLine, 800);
-  drawText(dailyResults.map(r => OUTCOME[r].emoji).join(''), 240, 30);
+  const size = 32, gap = 6, x0 = W / 2 - (DAILY_ROUNDS * size + (DAILY_ROUNDS - 1) * gap) / 2;
+  dailyResults.forEach((r, i) => drawPixelIcon(ctx, `sq-${r}`, x0 + i * (size + gap), 212, size));
   if (dailyPractice) {
     const off = official ? official.filter(r => r === 'hit').length : 0;
     drawText(`這是練習成績，今天的正式成績是 ${off} / ${DAILY_ROUNDS}`, 300, 16, C.muted, 400);
   } else {
-    drawText('🟩 命中　🟨 太少　🟥 太多　💦 溢出', 300, 15, C.muted, 400);
+    ctx.font = '400 15px system-ui, "PingFang TC", sans-serif';
+    drawLegend(ctx, W / 2, 300, 16, C.muted);
   }
   drawText('明天會有新的題目，記得再來挑戰！', 340, 16, C.muted, 400);
 }
@@ -805,7 +826,7 @@ function draw() {
     ctx.fill();
   }
 
-  drawText(message, 28, 17);
+  drawText(message, 28, 17, C.text, 600, phase === 'result' ? OUTCOME[outcome].icon : null);
   ctx.restore();
 }
 
@@ -820,7 +841,7 @@ function loop(now) {
 
 actionBtn.addEventListener('click', () => { act(); actionBtn.blur(); });
 shareBtn.addEventListener('click', () => { share(); shareBtn.blur(); });
-storyBtn.textContent = STORY_LABEL;
+storyBtn.innerHTML = STORY_LABEL;
 storyBtn.addEventListener('click', () => { shareStory(); storyBtn.blur(); });
 muteBtn.addEventListener('click', () => {
   sound.muted = !sound.muted;

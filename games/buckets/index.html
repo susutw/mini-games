@@ -16,6 +16,7 @@
   <meta property="og:locale" content="zh_TW">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="../../shared/style.css">
+  <script src="../../shared/pixel-icons.js"></script>
   <script src="../../shared/theme.js"></script>
   <style>
     .wrap { max-width: 680px; margin: 0 auto; }
@@ -32,7 +33,7 @@
     .modes button.active { background: var(--accent); color: var(--on-accent); }
     .hud { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 12px; flex-wrap: wrap; }
     .hud .right { display: flex; align-items: center; gap: 10px; color: var(--muted); }
-    #mute { background: var(--panel); border: 1px solid var(--border); padding: 4px 10px; }
+    #mute { background: var(--panel); color: var(--text); border: 1px solid var(--border); padding: 4px 10px; }
     canvas {
       display: block;
       width: 100%;
@@ -52,7 +53,7 @@
 </head>
 <body>
   <main class="container wrap">
-    <a class="back" href="../../">← 回大廳</a>
+    <a class="back" href="../../"><i data-px="arrow-left"></i> 回大廳</a>
     <div>
       <div class="modes">
         <button data-mode="endless">無限模式</button>
@@ -62,13 +63,13 @@
     <div class="hud">
       <strong id="title"></strong>
       <span id="status"></span>
-      <span class="right"><span id="extra"></span><button id="mute" aria-label="靜音">🔊</button></span>
+      <span class="right"><span id="extra"></span><button id="mute" aria-label="靜音"></button></span>
     </div>
     <canvas id="board"></canvas>
     <div class="controls">
-      <button id="action">開始放水 ▶</button>
-      <button id="share" hidden>分享成績 📋</button>
-      <button id="story" hidden>分享到 IG 限動 📸</button>
+      <button id="action">開始放水</button>
+      <button id="share" hidden>分享成績 <i data-px="clipboard"></i></button>
+      <button id="story" hidden></button>
     </div>
     <p class="hint">紅線往下掉時按「停」（或空白鍵 / 點畫面），讓右桶水位落在綠色區間</p>
   </main>

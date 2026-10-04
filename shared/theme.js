@@ -11,7 +11,7 @@
     const btn = document.createElement('button');
     btn.className = 'theme-toggle';
     const render = () => {
-      btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+      btn.innerHTML = px(theme === 'dark' ? 'sun' : 'moon', '22px');
       btn.title = btn.ariaLabel = theme === 'dark' ? '切換淺色模式' : '切換深色模式';
     };
     btn.addEventListener('click', () => {
